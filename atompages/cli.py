@@ -8,6 +8,12 @@ from atompages import generate_pages, autocompiler, server
 
 BASE_DIR = os.path.dirname(__file__)
 
+def root_argument(f):
+    return click.argument(
+       'root',
+       default=os.getcwd(),
+       type=click.Path(file_okay=False, writable=True))(f)
+
 @click.group()
 @click.option('-l', '--debug/--no-debug', default=False)
 def main(debug):
@@ -18,13 +24,10 @@ def main(debug):
     )
 
 @main.command()
-@click.argument('root', default=os.getcwd(), type=click.Path(file_okay=False, writable=True))
+@root_argument
 def init(root):
     """
     Initialize a new project.
-
-    parameters:
-        root: root of the project, defaults to current directory
     """
     root = os.path.abspath(root)
 
@@ -43,7 +46,7 @@ def init(root):
     generate_pages.build_site(root)
 
 @main.command()
-@click.argument('root', default=os.getcwd(), type=click.Path(file_okay=False, writable=True))
+@root_argument
 def generate(root):
     """
     Generate output from sources.
@@ -54,16 +57,13 @@ def generate(root):
 
 @main.command()
 @click.option('-p', '--port', default=8080, type=int)
-@click.argument('root', default=os.getcwd(), type=click.Path(file_okay=False))
+@root_argument
 def develop(port, root):
     """
     Start project development mode
 
     Opens a webbrowser pointing to your compiled webpage Automatically listens
     for file changes in source and recompiles
-
-    parameters:
-        root: root of the project, defaults to current directory
     """
     root = os.path.abspath(root)
 
@@ -77,14 +77,14 @@ def develop(port, root):
 
 @main.command()
 @click.option('-p', '--port', default=8080, type=int)
-@click.argument('root', default=os.getcwd(), type=click.Path(file_okay=False))
+@root_argument
 def serve(port, root):
     output_path = os.path.join(root, 'output')
 
     server.serve(output_path, '127.0.0.1', port)
 
 @main.command()
-@click.argument('root', default=os.getcwd(), type=click.Path(file_okay=False))
+@root_argument
 def get_images(root):
     """
     Return the markdown include code for all images in base_dir (default: current directory)
